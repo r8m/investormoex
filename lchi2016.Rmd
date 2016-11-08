@@ -66,7 +66,7 @@ if (!is.null(resday))
   filter(as.numeric(dohod_rub)!=0) %>%
   filter(as.numeric(count_deal)>100) -> resdayAll
 
-statLink<-"https://github.com/r8m/rltrading/raw/master/resDT.RData"
+statLink<-"https://github.com/r8m/moexinvestor/raw/master/resDT.RData"
 download.file(statLink, "resDT.RData")
 load("resDT.RData")
 
