@@ -66,11 +66,12 @@ if (!is.null(resday))
   filter(as.numeric(dohod_rub)!=0) %>%
   filter(as.numeric(count_deal)>100) -> resdayAll
 
-statLink<-"https://github.com/r8m/moexinvestor/raw/master/resDT.RData"
+statLink<-"https://github.com/r8m/investormoex/raw/master/resDT.RData"
 download.file(statLink, "resDT.RData")
 load("resDT.RData")
-
-
+resDT[,trader_id:=NULL]
+revisionDate<-resDT[1,moment]
+resDT[,moment:=NULL]
 traders.list<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/trader.csv",  
              sep=";", as.is=TRUE,
                 quote="",
@@ -402,9 +403,11 @@ observe({
 ```{r stats6}
 #renderDataTable(TSALL())
 output$tbl<-DT::renderDataTable(resDT,
-                    filter = 'top',
-                    selection = 'single',
-                options = list(
+                  filter = 'top',
+                  selection = 'single',
+                  caption=revisionDate,
+                  colnames=""
+                  options = list(
                   pageLength = 10,
                   scrollX=T,
                   #scrollY=T,
