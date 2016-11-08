@@ -1,0 +1,727 @@
+---
+title: "Trades Visualizer version 0.7   "
+runtime: shiny
+output:
+  flexdashboard::flex_dashboard:
+    social: menu
+    vertical_layout: fill
+    theme: simplex
+---
+
+```{r global, include=FALSE}
+local<-TRUE
+if (!local) encoding<-"" else encoding<-"CP1251"
+
+library(FinancialInstrument)
+library(PerformanceAnalytics)
+library(rusquant)
+library(blotter)
+library(ggplot2)
+library(dplyr)
+library(rmarkdown)
+library(quantmod)
+library(highcharter)
+library(markdown)
+library(data.table)
+library(DT) # install.packages('DT')
+library(flexdashboard) # devtools::install_github('rstudio/flexdashboard')
+source("func.my.R",encoding = "UTF-8")
+source('makeportfolio.R',encoding = "UTF-8")
+
+data(tickers)
+markets<-c("Срочный"=2, "Фондовый"=1, "Валютный"=3)
+TradesLink<-"ftp://ftp.moex.com/pub/info/stats_contest"
+yearId<-2016
+dateId<-"all"
+initEq<-100000
+
+if (!exists('.blotter')) .blotter <- new.env()
+userPortf<-"user_port"
+userAcc<-"user_acc"
+
+
+spot<-read.table("spot.csv", header=TRUE, sep=";", as.is=TRUE,encoding = "UTF-8")
+#REFRESH
+
+resday<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/result_day.csv",
+            header=TRUE
+             , sep=";", 
+               dec=".",
+                 quote="",
+                   as.is=TRUE,
+                    fileEncoding = encoding,
+               skipNul=TRUE
+                   )
+
+
+if (!is.null(resday)) 
+  resday %>% 
+  select(trader_id,contype_name,dohod_rub,amount) %>% 
+  filter (dohod_rub!=0) -> resdayS
+
+
+if (!is.null(resday))
+  resday %>% 
+  select(contype_name,trader_id,	nik,	diler_name,	date_start,	dohod,	amount,	dohod_rub,	count_deal,	qty,	vol_rub,	uchastnik_activ,	duel_win,	duel_loss) %>% 
+  filter(as.numeric(dohod_rub)!=0) %>%
+  filter(as.numeric(count_deal)>100) -> resdayAll
+
+statLink<-"https://github.com/r8m/rltrading/raw/master/resDT.RData"
+download.file(statLink, "resDT.RData")
+load("resDT.RData")
+
+
+traders.list<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/trader.csv",  
+             sep=";", as.is=TRUE,
+                quote="",
+             fileEncoding=encoding,
+              header=FALSE)
+c<-as.data.frame(traders.list$V2)
+d<-t(c)
+f<-as.data.frame(d, row.names=NULL)
+colnames(f)<-traders.list$V1
+
+qntFinal<-read.csv("qntFinal.csv", as.is=TRUE)
+
+```
+
+
+```{r}
+#includeHTML("google-analytics2.js")
+#includeHTML("ya-analytics.js")
+```
+
+Sidebar {.sidebar}
+======================================================================
+```{r side}
+ renderUI({selectInput("exch", "Рынок:",
+             markets,selected=markets[marketSelected()[[1]][1]])})
+
+ renderUI({
+   userChoices<-c("Выберите"="", "->Свои сделки<-"=1, f)
+   selectInput("nick", "Участник:",userChoices,selected=userChoices[userSelected()[[1]][1]])
+   })
+
+ renderUI ({
+  # tagList(
+    if (userId()==1) ({
+  
+          fileInput("file1", "Выберите файл сделок:",
+             accept = c( 
+               "text/csv",
+               "text/comma-separated-values,text/plain",
+                 ".csv")
+    
+      )})})
+ 
+     renderUI ({selectInput (inputId="stock", label="Инструмент:", choices =  userSymbols(), selected = "")})
+
+#     renderUI ({numericInput(inputId="num", label = "Позиции на начало конкурса:", #value = qnty())})
+
+
+ selectInput("candle", "Свечки:",
+      c("1min",
+      "5min",
+      "10min",
+      "15min",
+      "30min",
+      "hour",
+      "day"), selected="10min")
+ actionButton("goButton", "Посмотреть!",icon = icon("refresh"))
+ hr()
+
+ 
+ 
+#REFRESH
+dateRangeInput('dateRange2',format = "dd/mm/yy",
+                                             label = 'Выбор дат:',
+                                             #min = "2016-09-15", max = Sys.Date(),
+                                             start = "2016-09-15",
+                                             end   = Sys.Date(),
+                                             language = "ru",
+                                             separator = " - ", 
+                                             startview = 'month', weekstart = 1,
+                                             width='95%'
+                              )
+
+hr()
+ checkboxInput("inter", "Интерактивный график", FALSE)
+
+#hr()
+
+##отладка
+# renderPrint({
+#     s = input$tbl_rows_selected
+#     prr<-resdayAll[s,] %>% select(contype_name,	nik)
+#     if (length(s)) {
+#       #print('These rows were selected:\n\n')
+#       #cat(marketSelected()[[1]][1],"\n\n")
+#       #cat(userSelected()[[1]][1],"\n\n")
+#       #c(yearId, userId(),marketId(), userSelected()[[1]][1], to(), period()))
+#       #res<-c(yearId)
+#       cat(unlist(userStat()),"\n\n")
+#       
+#       #paste(prr,marketSelected()[[1]][1], sep = ',')
+# 
+#     }
+#   })
+
+
+```
+
+```{r download}
+
+
+marketSelected<-reactive({
+    s = input$tbl_rows_selected
+    ms<-resDT[s,contype_name]# %>% select(contype_name)
+    if (!length(s)) return (1)
+    else return (ms) 
+  })
+
+  marketId<-reactive(input$exch)
+  userId<-reactive(input$nick)
+ # initPosQty<-reactive(input$num)
+  initPosQty<-reactive(qnty())
+  
+  period<-reactive(input$candle)
+  
+  userData2<-reactive({
+    if ( userId()=="") return (NULL)
+    
+    if (userId()==1) ({
+     if (!is.null(input$file1))({
+      progress <- shiny::Progress$new(session, min=0, max=10)
+      progress$set(value=2,message="", detail = 'Загрузка сделок...')
+      on.exit(progress$close())
+      sourceData<-read.csv(input$file1$datapath,sep=";", header=FALSE, as.is=TRUE) 
+      return (sourceData)
+     })
+    }) else
+      ({
+    progress <- shiny::Progress$new(session, min=0, max=10)
+    on.exit({
+      progress$close()
+      file.remove(paste0(file,".zip"))
+      if (file.exists(paste0(file,".csv"))) 
+      {
+        sourceData<-read.csv(paste0(file,".csv"),sep=";", header=FALSE, as.is=TRUE) 
+        file.remove(paste0(file,".csv"))
+        return (sourceData)
+      }
+      else {return (NULL)}
+    }
+    )
+    
+    progress$set(value=2,message="", detail = 'Загрузка сделок...')
+    file<-paste0(marketId(),"_", userId())
+    TradesLink<-paste(TradesLink, yearId,dateId,paste0(file,".zip"),sep="/")
+    download.file(TradesLink, paste0(file,".zip"))
+    unzip(paste0(file,".zip"))
+  
+      })
+   })
+
+  
+
+userSelected<-reactive({
+    s = input$tbl_rows_selected
+    us<-resDT[s,nik]# %>% select(nik)
+    if (!length(s)) return ("")
+    else return (us) 
+  })
+
+userSymbols<-reactive(levels(as.factor(userData2()$V2)))
+
+userStat<-reactive({
+  
+  if ( userId()=="") return (NULL)
+  else{  res<-isolate(makePortfolio(yearId, 
+                     userId(),
+                     marketId(), 
+                     nick=userSelected()[[1]][1], 
+                     amount=100000, 
+                     strptime(resday$moment[1], "%d.%m.%Y"), 
+                     period()))
+  return (res)}
+  })
+
+qnty<-reactive({
+  if ( userId()=="") return (NULL)
+  qnty<-qntFinal%>%
+  filter(id==userId()&seccode==gsub(" ","",input$stock))%>%
+  select(startPos)%>%as.numeric
+  qnty[is.na(qnty)]<-0
+  
+  return (qnty)
+   
+})
+
+
+
+```
+
+```{r selectdata}
+userSymbols2<- eventReactive(input$goButton, {    input$stock  })
+
+  port2<-reactive(paste0(userSymbols2(),".port"))
+  acc2<-reactive(paste0(userSymbols2(),".acc")) 
+
+    symbols<-reactive({
+    if ((userSymbols2()=="")) return (NULL)
+   
+    if (marketId()==2) 
+      searchSymbol(paste0(userSymbols2()," ")) 
+    else 
+      spot[spot[,1]==gsub(" ","",userSymbols2()),2]
+ 
+  }
+    )
+    
+    symbol.trades<-reactive({
+      if (userSymbols2()=="") return (NULL)
+      userData2()[userData2()$V2==userSymbols2(),]
+      
+    }
+    )  
+    
+    
+  from<-reactive(
+{
+    input$goButton
+    isolate({
+      if ((userSymbols2()=="")) return (NULL)
+      #REFRESH
+   if (initPosQty()==0) as.Date(symbol.trades()[1,1]) else as.Date("2016-09-15")
+   
+    })
+}
+   )
+
+  to<-reactive(
+{
+    input$goButton
+    isolate({
+      if ((userSymbols2()=="")) return (NULL)
+      if (initPosQty()==-sum(symbol.trades()[,3])) as.Date(last(symbol.trades()[,1])) else Sys.Date()  
+    
+    })
+}
+    )
+  
+```  
+
+```{r download instr}
+  ret<-reactive({
+   if ((userSymbols2()=="")) return (NULL)
+    progress <- shiny::Progress$new(session, min=0, max=10)
+    on.exit(progress$close())
+    progress$set(value=3,message="", detail = 'Загрузка истории...')
+    xxx<-getSymbols(symbols(), from=from(), to=to(), period=period(), src='mfd',adjust=TRUE, auto.assign=FALSE)
+ 
+    return (xxx)
+    
+  })
+   
+  symbol.tradesFinal<-reactive({
+    if (userSymbols2()=="") return (NULL)
+    
+    if (initPosQty()!=0) {
+      
+      xxx.df<-as.data.frame(ret())
+      row.NAMES<-row.names(xxx.df)
+      #REFRESH
+      if (marketId()==2) first2<-grep("2016-09-15 19:",row.NAMES)[1]-1
+      else first2<-grep("2016-09-16", row.NAMES)[1]-1
+      new.order<-c(row.NAMES[first2],userSymbols2(),initPosQty(), xxx.df[first2,4])
+      userData2<-rbind(new.order,symbol.trades())
+      return (userData2)
+      
+      
+    }
+    
+    else return (symbol.trades())
+    
+  }) 
+  
+  symbol.trades.xts<-reactive(
+    
+    {
+      if (userSymbols2()=="") return (NULL)
+      ST<-xts(cbind(symbol.tradesFinal()$V4,symbol.tradesFinal()$V3),
+              order.by=as.POSIXct(symbol.tradesFinal()[,1]))
+      colnames(ST)<-c("TxnPrice","TxnQty")
+      return (ST)
+    }
+  )
+```
+
+```{r portfolio}
+observe({
+  input$goButton
+  isolate({
+    if ((userSymbols2()=="")) return (NULL)
+    
+    symbol<-userSymbols2()
+    assign(symbol,ret(), envir=.GlobalEnv)
+    
+    currency("RUB")
+    stock(symbol,currency="RUB")
+
+    port<-port2()
+    acc<-acc2()
+    
+    try(rm(list=c(paste0("portfolio.",port),
+                  paste0("account.",acc)),
+           pos=.blotter), silent =FALSE)
+    
+    initPortf(name=port,
+              symbols=symbol,
+              initPosQty = 0, 
+              currency="RUB"
+    )
+    
+    initAcct(name=acc,
+             portfolios=port,
+             initEq=initEq, 
+             currency="RUB"
+             
+    )
+    addTxns(port,symbol,TxnData=symbol.trades.xts(),verbose=FALSE)
+    updatePortf(port)
+    updateAcct(acc)
+  })
+
+})
+```
+
+
+Участники {data-icon="fa-user"}
+============================================================================
+###
+```{r stats6}
+#renderDataTable(TSALL())
+output$tbl<-DT::renderDataTable(resDT,
+                    filter = 'top',
+                    selection = 'single',
+                options = list(
+                  pageLength = 10,
+                  scrollX=T,
+                  #scrollY=T,
+                  scroller=T#,
+                  #initComplete = I("function(settings, json) {alert('Done.');}")
+                  )
+)
+
+DT::dataTableOutput('tbl')
+
+
+```
+
+График {data-icon="fa-line-chart"}
+======================================================================
+```{r plotTS}
+renderUI(if (input$inter) highchartOutput("highchart") else plotOutput("plot"))
+
+output$highchart<-renderHighchart({
+  if (userSymbols2()=="") return (NULL)
+   if (input$inter) ({
+   progress <- shiny::Progress$new(session, min=0, max=10)
+    on.exit(progress$close())
+    progress$set(value=9,message="", detail = 'Строим график...')  
+   chart.Posn.my(port2(), userSymbols2())
+   
+   })
+   
+   })
+ 
+output$plot<-renderPlot({
+    if (userSymbols2()=="") return (NULL)
+    if (!input$inter) ({
+    progress <- shiny::Progress$new(session, min=0, max=10)
+    on.exit(progress$close())
+    progress$set(value=9,message="", detail = 'Строим график...')  
+    
+     theme<-chart_theme()
+      # if (!input$outliers) 
+     #{
+   theme$col$up.col<-'#0000ff'
+     theme$col$up.border<-'#0000ff'
+     theme$col$dn.col<-'#FAAC58'
+     theme$col$dn.border<-'#FAAC58'
+     #}
+    chart.Posn(port2(), 
+                   userSymbols2(),
+                      theme=theme, 
+                   Dates=paste0(as.character(max(input$dateRange2[1],from())),
+                               "/",as.character(min(to(),input$dateRange2[2])))
+                 
+    )
+    })
+}
+)
+
+```
+
+Статистика {data-icon="fa-user"}
+============================================================================
+Column {data-width=6}
+----------------------------------------------------------------------------
+###
+```{r stats5}
+TS2<-reactive(
+  {
+  input$goButton
+  isolate(tradeStats(Portfolios =port2(), use="trades"))
+  }
+  )
+
+dStats<-reactive(
+{
+  input$goButton
+  isolate(dailyStats(Portfolios = port2(), use="equity"))
+}
+  )
+
+table.perf<-reactive({
+  if ((userSymbols2()=="")) return (NULL)
+  TS2<-TS2()[,-c(1:5)]
+  TS2<-round(t(TS2),2)
+ 
+  dStats2<-c(
+    "Средний результат",
+    "Медианный результат",
+    "Максимальный выигрыш",
+    "Максимальный проигрыш",
+    "Валовая прибыль",
+    "Валовый убыток",
+    "Ст. отклонение результата",
+    "% положительных",
+    "% отрицательных",
+    "Профит-фактор",
+    "Средний прибыльный результат",
+    "Медианный прибыльный результат",
+    "Средний убыточный результат",
+    "Медианный убыточный результат",
+    "Средний дневной результат",
+    "Медианный дневной результат",
+    "Ст. отклонение дн. результата",
+    "Шарп",
+    "Макс. просадка",
+    "Прибыль/макс. просадка",
+    "Среднее отношение выигрышных к проигрышным",
+    "Медианное отношение выигрышных к проигрышным",
+    "Макс. результат",
+    "Мин. результат",
+    "Текущ. результат")
+  
+  a<-cbind(dStats2,TS2,round(t(dStats()[,-c(1:4)]),2))
+  colnames(a)<-c("Параметр","По трейдам","По дням")
+  return(a)
+  
+})
+
+renderDataTable(table.perf())
+```
+
+Column {data-width=4}
+-----------------------------------------------------------------------
+
+###
+```{r VB1}
+renderValueBox(
+  {
+
+valueBox(as.integer(TS2()[5]), 
+         "Результат, в валюте контракта",
+           icon = "fa-pencil",
+           color =  "red")
+    
+ }
+)
+```
+
+###
+```{r VB2}
+renderValueBox(
+{
+ 
+ # if (userSymbols2()=="") valueBox("","", color="red") else
+       valueBox(TS2()[3],"Сделок, шт.", color="red", icon="fa-reorder")
+
+  } 
+)
+
+#
+```
+
+###
+```{r VB3}
+renderValueBox(
+{
+ #  if (userSymbols2()=="") valueBox("","", color="red") else
+      valueBox(TS2()[4],"Трейдов, шт.", color="red", icon="fa-area-chart")
+    } 
+  )
+```
+
+###
+```{r G1}
+renderGauge(gauge(as.numeric(dStats()[2]), min = 0, max = 64,
+                   label="Дней в конкурсе", sectors=gaugeSectors(colors="warning")))
+```
+
+###
+```{r G2}
+renderGauge(gauge(as.numeric(dStats()[3]), min = 0, max = as.numeric(dStats()[2]),
+                   label="Дни с прибылью"))
+```
+
+###
+```{r G3}
+renderGauge(gauge(as.numeric(dStats()[4]), min = 0, max = as.numeric(dStats()[2]),
+                   label="Дни с убытком", sectors=gaugeSectors(colors="danger")))
+
+```
+
+Доходность {data-icon="fa-bar-chart"}
+============================================================================
+```{r perf}
+renderPlot({
+  if (userSymbols2()=="") return (NULL)
+  
+  charts.PerformanceSummary.my(PortfReturns(acc2()), geometric = FALSE,main = "")
+  
+},res=100)
+
+```
+
+
+Срез {data-icon="fa-dashboard"}
+============================================================================
+```{r srez}
+srez<-reactive({
+  
+  if (is.null(resdayS)) return (NULL) else
+    
+  {
+    decl2<-filter(resdayS, trader_id==userId())
+   srez22<- ggplot(data=resdayS,aes(x = amount/1000, y=dohod_rub/1000))+
+      ylab("Доход, тыс.руб.")+
+      xlab("Старт.активы, тыс.руб.")+
+      geom_rug()+
+      facet_wrap(~contype_name,scales = "free")+
+      geom_point()+
+     geom_point(data = decl2,colour = 'red', size = 3)
+   return (srez22)
+  }
+  
+})
+
+renderPlot(srez())
+```
+
+Отчет {data-icon="fa-book"}
+============================================================================
+###
+```{r report}
+radioButtons('format', 'Формат:', c('HTML', 'Word'),inline = FALSE)
+downloadLink('downloadReport', label = 'Загрузить отчет')
+
+output$downloadReport <- downloadHandler(
+  filename = function() {
+    paste('my-report', sep = '.', switch(
+      input$format, PDF = 'pdf', HTML = 'html', Word = 'docx'
+    ))
+  },
+  
+  content = function(file) {
+   
+    src <- normalizePath('report/report.Rmd')
+    owd <- setwd(tempdir())
+    on.exit(setwd(owd))
+    file.copy(src, 'report.Rmd')
+    
+    
+    out <- render('report.Rmd', switch(
+      input$format,
+      PDF = pdf_document(), HTML = html_document(), Word = word_document()
+    ))
+    file.rename(out, file)
+  }
+  
+
+)
+```
+
+Версии {data-icon="fa-reorder"}
+============================================================================
+###Версии
+0.7 от 16.10.2016 - обновлены нач. позиции у новых (с 01.10) участников, добавлена метка (на графике) ввода новых тарифов МБ (с 03.10), написана справка 
+
+0.6 от 30.09.2016 - добавлена загрузка своих сделок, автоподстановка нач. позиций, добавлены пропущенные тикеры
+
+0.5 от 23.09.2016 - исправлена ошибка интерактивного графика
+
+0.4 от 22.09.2016 - добавлен интерактивный график
+
+0.3 от 20.09.2016 - добавлены пропущенные тикеры
+
+0.2 от 19.09.2016 - исправлена ошибка некорректных ников
+
+0.1 от 18.09.2016 - новая версия для 2016 года переработанная под flexdashboard.
+
+Справка {data-icon="fa-question"}
+============================================================================
+### Автор: Тихонов Алексей - potom2007@yandex.ru, Лукерьин Роман - rlukerin@gmail.com
+
+Данный веб-сервис позволяет пользователю загружать собственные сделки, а также сделки участников конкурса ЛЧИ, и анализировать их с помощью интерактивной диаграммы и статистической информации. 
+
+**Боковая панель**  
+Для загрузки собственных сделок необходимо в выпадающем списке выбора участников выбрать *->Свои сделки<-* и указать текстовый файл в следующем формате (без заголовка):  
+YYYY-MM-DD HH:MM:SS; TICKER; QTY; PRICE  
+Пример строки:  
+2016-09-16 13:30:00.000;RIZ6;-1;96230.00000
+
+**Панель График**  
+На данной панели выводится график истории торгов выбранного инструмента и осуществленных сделок, график накопленной позиции, графики кривой доходности и просадок. Данный график может быть интерактивным (с легендой по наведению, масштабированием по оси времени) для этого необходимо отметить параметр *Интерактивный график* в боковой панели
+
+**Панель Статистика**  
+На данной панели выводится сводная статистика по осуществленным сделкам
+
+
+**Панель Доходность**  
+На данной панели выводится в графическом виде ежедневная доходность и графики накопленной прибыли и просадок
+
+**Панель Срез**  
+На данной панели выводится в графическом виде результаты всех участников в разрезе всех трех рынков с учетом их стартовой суммы и полученной доходности (выбранный участник выделяется цветом)
+
+**Панель Отчет**  
+На данной панели возможно сохранить все результаты в документ docx, pdf, html.
+Для этого необходимо выбрать тип документа и нажать кнопку *Загрузить отчет* (занимает время)
+
+**Панель Версии**  
+На данной панели указана изменения в версиях продукта
+
+**Панель Справка**  
+На данной (текущей) панеле приведена основная справка по сервису
+
+Поддержите проект: перевод на yandex-кошелек 410011860379477 (воспользуйтесь формой ниже)
+```{r support}
+tags$iframe(
+   src="https://money.yandex.ru/embed/donate.xml?account=410011860379477&quickpay=donate&payment-type-choice=on&default-sum=&targets=%D0%9F%D0%BE%D0%B6%D0%B5%D1%80%D1%82%D0%B2%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5+%D0%BD%D0%B0+%D1%80%D0%B0%D0%B7%D0%B2%D0%B8%D1%82%D0%B8%D0%B5+%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B0&target-visibility=on&project-name=&project-site=&button-text=01&comment=on&hint=%D0%92%D0%B0%D1%88%D0%B5+%D0%BF%D0%BE%D0%B6%D0%B5%D0%BB%D0%B0%D0%BD%D0%B8%D0%B5+%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D1%83&successURL=",
+   width="500", 
+   height="175", 
+   frameborder="0", 
+   allowtransparency="true", 
+   scrolling="no"      
+ )
+
+
+#tags$head(tags$script(src = "google-analytics.js"))
+#
+
+
+```
+
+
