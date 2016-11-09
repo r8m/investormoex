@@ -406,7 +406,7 @@ output$tbl<-DT::renderDataTable(resDT,
                   filter = 'top',
                   selection = 'single',
                   caption=revisionDate,
-                  colnames=""
+                  #colnames=""
                   options = list(
                   pageLength = 10,
                   scrollX=T,

@@ -9,6 +9,7 @@ makeSymbols<-function(yearId, userId,marketId, nickname="unknown", amount=100000
          pos=.blotter), silent =FALSE)
   
   
+  from<- strptime(from, "%d.%m.%Y")
   
   #download user data and trades data
   #userId<-"50175"

@@ -8,8 +8,16 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
                 paste("account",userAcc,sep=".")),
          pos=.blotter), silent =FALSE)
   
-  
-  
+  fromStart<- strptime("2016-09-15 19:00:00", "%F %H:%M:%S")
+  from<- strptime(from, "%d.%m.%Y")
+  dayofweek<-as.numeric(format(from,"%u"))
+  if(dayofweek==1)
+    from<-from-60*60*24*3+60*60*19
+  else
+    from<-from-60*60*24*1+60*60*19
+  to<- strptime(to, "%d.%m.%Y")
+
+  data(tickers)
   #download user data and trades data
   #userId<-"50175"
   dateId<-"all" # all - all trades, 20141208 - day trades
@@ -34,13 +42,14 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   userSymbols<-levels(factor(userData$V2))
   userData$V2<-gsub(" ","",userData$V2)
            
-   #Load historical data for the symbol
+  
+  fromUser<-as.POSIXct(userData[1,1])
+  
+  #Load historical data for the symbol
   #data("tickers")
   #MOEXSymbols<-loadStockListMoex()
   #MOEXSymbols<-data.table(MOEXSymbols, stringsAsFactors=FALSE)
 
-  spot<-read.table("spot.csv", header=TRUE, sep=";", as.is=TRUE,encoding = "UTF-8")
-  
   if (marketId==2) 
     symbols<-unlist(sapply(paste(userSymbols, " ", sep=""), 
                            searchSymbol, USE.NAMES=FALSE))
@@ -63,8 +72,18 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   #symbol<-toupper(symbol)
   symbols<-toupper(symbols)
   for(s in symbols){
-    if(exists(s))
-      assign(s, get(s),envir=globalenv())
+    if(exists(s)){
+      if(length(get(s)[paste(from,"/", sep="")])>0){
+        assign(s,get(s)[paste(from,"/", sep="")])
+        assign(s, get(s),envir=globalenv())
+      }
+      else{
+        userSymbols<-userSymbols[-match(s,symbols)]
+        symbols<-symbols[-match(s,symbols)]
+        
+      }
+        
+    }
     else{
       userSymbols<-userSymbols[-match(s,symbols)]
       symbols<-symbols[-match(s,symbols)]
@@ -94,10 +113,11 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   
   initPosQty[symbols.df$userSymbols %in% qnty$seccode]<-qnty[seccode %in% symbols.df$userSymbols,startPos]
   
+  
   #initPortf(userPortf,symbols=symbol,initDate=initDate)
   initPortf(userPortf,
             symbols=symbols,
-            initPosQty = initPosQty, 
+            initPosQty = 0,#initPosQty, 
             initDate=initDate,
             currency="RUB")
   
@@ -114,9 +134,20 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   # Add the transactions to the portfolio
   for(s in symbols){
     us<-as.character(symbols.df[symbols.df[,1]==s,2])
+    
+    if(length(qnty[seccode==us, startPos])){
+      neworder<-data.frame(V1=as.character(index(get(s)$Open[1])),
+                           V2=us,
+                           V3=qnty[seccode==us, startPos],
+                           V4=as.numeric(get(s)$Open[1]))
+      
+      userData<-rbind(neworder, userData)
+    }
+    
     symbol.trades<-userData[userData$V2==us,]
     symbol.trades<-xts(cbind(symbol.trades$V4,symbol.trades$V3),
                        order.by=as.POSIXct(symbol.trades[,1]))
+    
     colnames(symbol.trades)<-c("TxnPrice","TxnQty")
     blotter:::addTxns(userPortf,s,
                       TxnData=symbol.trades,verbose=FALSE)

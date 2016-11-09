@@ -3,7 +3,7 @@ setwd("~/repo/shinyLCHI(AlexeyT)/new")
 local<-TRUE
 if (!local) encoding<-"" else encoding<-"CP1251"
 
-library(FinancialInstrument)
+#library(FinancialInstrument)
 library(PerformanceAnalytics)
 library(rusquant)
 library(blotter)
@@ -23,13 +23,12 @@ data(tickers)
 markets<-c("Срочный"=2, "Фондовый"=1, "Валютный"=3)
 TradesLink<-"ftp://ftp.moex.com/pub/info/stats_contest"
 yearId<-2016
-dateId<-"all"
-initEq<-100000
+#dateId<-"all"
+#initEq<-100000
 
 if (!exists('.blotter')) .blotter <- new.env()
 userPortf<-"user_port"
 userAcc<-"user_acc"
-
 
 spot<-read.table("spot.csv", header=TRUE, sep=";", as.is=TRUE,encoding = "UTF-8")
 #write.table(spot,file="spot.csv",sep=";",row.names = F )
@@ -46,9 +45,12 @@ resday<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/result_day.cs
 )
 
 
-statDT<-data.table(resdayAll)
-statDT[as.numeric(count_deal)>100]
+statDT<-data.table(resday)
+statDT<-statDT[as.numeric(count_deal)>1000]
 statDT<-statDT[, marketId:=ifelse(contype_name=="Срочный", 2, ifelse(contype_name=="Фондовый", 1,3))]
+rm(resday)
+
+nrec<-statDT[,.N]
 
 timerStart<-Sys.time()
 # resDT<-rbindlist(lapply(1:statDT[,.N], 
@@ -61,37 +63,41 @@ timerStart<-Sys.time()
 #                                                         "10min" )
 #                           #print(paste(x,allU,sep=" / "))
 #                           }
-#                         ))
 
-library(parallel)
+
+
+library(foreach)
+library(doParallel)
 no_cores <- detectCores()
-# Initiate cluster
-cl <- makeCluster(no_cores,type="FORK")
-resDT<-parLapply(cl,1:statDT[,.N], 
-                 fun = function(x) {makePortfolio(yearId, 
-                                                  statDT[x,trader_id], 
-                                                  statDT[x,marketId], 
-                                                  statDT[x,nik],
-                                                  statDT[x,amount],
-                                                  strptime(statDT[x,date_start], "%d.%m.%Y"),
-                                                  strptime(resday$moment[1], "%d.%m.%Y"), 
-                                                  "10min" )
-                   #print(paste(x,allU,sep=" / "
-                   
-                 }
-)
+cl<-makeCluster(no_cores, outfile="")
+registerDoParallel(cl)
+
+#nrec=4
+parMakePortfolio <- function (nrec) {
+  foreach(x = 1:nrec, 
+          #.combine = rbindlist,
+          .export = c("spot", "tickers", "statDT", "yearId","makePortfolio","userPortf", "userAcc"), 
+          .packages = c("rusquant", "blotter", "PerformanceAnalytics", "data.table"))  %dopar%  
+    makePortfolio(yearId, 
+                  statDT[x,trader_id], 
+                  statDT[x,marketId], 
+                  statDT[x,nik],
+                  statDT[x,amount],
+                  statDT[x,date_start],
+                  statDT[1,moment], 
+                  "10min" )
+}
+
+resList<-parMakePortfolio(nrec)
 stopCluster(cl)
-resDT<-rbindlist(resDT)
 print(Sys.time()-timerStart)
 
+resDT<-rbindlist(resList)
 
-resDT[,nik:=nickname]
-resDT[, moment:=resday$moment[1]]
-
-statDT[,skey:=paste(trader_id, contype_name, sep="")]
+statDT[,skey:=paste(trader_id, marketId, sep="")]
 setkey(statDT,skey)
 
-resDT[,skey:=paste(trader_id, contype_name, sep="")]
+resDT[,skey:=paste(userId, marketId, sep="")]
 setkey(resDT,skey)
 
 resDT<-statDT[resDT]
@@ -117,7 +123,7 @@ cols<-c("moment",
 #"duel_win",
 #"duel_loss",
 #"nickname",
-"ticker",
+"usersymbol",
 "Num.Txns",
 "Num.Trades",
 "Net.Trading.PL",
