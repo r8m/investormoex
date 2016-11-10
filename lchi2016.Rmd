@@ -26,7 +26,6 @@ library(data.table)
 library(DT) # install.packages('DT')
 library(flexdashboard) # devtools::install_github('rstudio/flexdashboard')
 source("func.my.R",encoding = "UTF-8")
-source('makeportfolio.R',encoding = "UTF-8")
 
 data(tickers)
 markets<-c("Срочный"=2, "Фондовый"=1, "Валютный"=3)
@@ -235,18 +234,6 @@ userSelected<-reactive({
 
 userSymbols<-reactive(levels(as.factor(userData2()$V2)))
 
-userStat<-reactive({
-  
-  if ( userId()=="") return (NULL)
-  else{  res<-isolate(makePortfolio(yearId, 
-                     userId(),
-                     marketId(), 
-                     nick=userSelected()[[1]][1], 
-                     amount=100000, 
-                     strptime(resday$moment[1], "%d.%m.%Y"), 
-                     period()))
-  return (res)}
-  })
 
 qnty<-reactive({
   if ( userId()=="") return (NULL)
@@ -766,6 +753,8 @@ output$downloadReport <- downloadHandler(
 Версии {data-icon="fa-reorder"}
 ============================================================================
 ###Версии
+0.7b от 10.11.2016 - добавлена таблица участников и статистики торговли по инструментам
+
 0.7 от 16.10.2016 - обновлены нач. позиции у новых (с 01.10) участников, добавлена метка (на графике) ввода новых тарифов МБ (с 03.10), написана справка 
 
 0.6 от 30.09.2016 - добавлена загрузка своих сделок, автоподстановка нач. позиций, добавлены пропущенные тикеры
