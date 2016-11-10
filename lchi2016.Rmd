@@ -402,19 +402,124 @@ observe({
 ###
 ```{r stats6}
 #renderDataTable(TSALL())
+cols<-c(#"moment",
+  "contype_name", 
+  #"trader_id",
+  "nik",
+  #"diler_name",
+  "date_start",
+  "dohod",
+  "amount",
+  "dohod_rub",
+  "count_deal",
+  #"qty",
+  "tickersqty",
+  #"vol_rub",
+  #"duel_win",
+  #"duel_loss",
+  #"nickname",
+  "usersymbol",
+  "Num.Txns",        
+  "Num.Trades",
+  "Net.Trading.PL",
+  "Avg.Trade.PL",
+  "Med.Trade.PL",
+  "Largest.Winner",
+  "Largest.Loser",
+  "Gross.Profits",
+  "Gross.Losses",
+  "Std.Dev.Trade.PL",
+  "Percent.Positive",
+  "Percent.Negative",
+  "Profit.Factor",
+  "Avg.Win.Trade",
+  "Med.Win.Trade",
+  "Avg.Losing.Trade",
+  "Med.Losing.Trade",
+  "Avg.Daily.PL",
+  "Med.Daily.PL",      
+  "Std.Dev.Daily.PL",
+  "Ann.Sharpe",
+  "Max.Drawdown",
+  "Profit.To.Max.Draw",
+  "Avg.WinLoss.Ratio",
+  "Med.WinLoss.Ratio",
+  "Max.Equity",
+  "Min.Equity",
+  "End.Equity" )
+
+
+colnamesru<-c("Рынок",
+              "Участник",
+              "Начало",
+              "Доход, %",
+              "Нач. сумма",
+              "Доход,руб",
+              "Общ. сделок",
+              "Кол-во тикеров",
+              "Тикер",
+              "Num.Txns",        
+              "Num.Trades",
+              "Net.Trading.PL",
+              "Avg.Trade.PL",
+              "Med.Trade.PL",
+              "Largest.Winner",
+              "Largest.Loser",
+              "Gross.Profits",
+              "Gross.Losses",
+              "Std.Dev.Trade.PL",
+              "Percent.Positive",
+              "Percent.Negative",
+              "Profit.Factor",
+              "Avg.Win.Trade",
+              "Med.Win.Trade",
+              "Avg.Losing.Trade",
+              "Med.Losing.Trade",
+              "Avg.Daily.PL",
+              "Med.Daily.PL",      
+              "Std.Dev.Daily.PL",
+              "Ann.Sharpe",
+              "Max.Drawdown",
+              "Profit.To.Max.Draw",
+              "Avg.WinLoss.Ratio",
+              "Med.WinLoss.Ratio",
+              "Max.Equity",
+              "Min.Equity",
+              "End.Equity")
+
+
+
+resDT<-resDT[,.SD, .SDcols=cols] 
+
 output$tbl<-DT::renderDataTable(resDT,
-                  filter = 'top',
-                  selection = 'single',
-                  caption=revisionDate,
-                  #colnames=""
-                  options = list(
-                  pageLength = 10,
-                  scrollX=T,
-                  #scrollY=T,
-                  scroller=T#,
-                  #initComplete = I("function(settings, json) {alert('Done.');}")
-                  )
+                                filter = 'top',
+                                selection = 'single',
+                                caption=paste("Ревизия:",revisionDate),
+                                colnames=colnamesru,
+                                rownames = FALSE,
+                                width=200,
+                                
+                                options = list(
+                                  pageLength = 15,
+                                  searchHighlight = TRUE,
+                                  scrollX=T,
+                                  scrollY=T,
+                                  scroller=T,
+                                  autoWidth = TRUE,
+                                  columnDefs = list(list(width = '200px', targets = c(1))),
+                                  rowCallback = JS(
+    "function(row, data) {",
+    "var num = data[5].toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')+'₽';",
+    "$('td:eq(5)', row).html(num);",
+    "var num =  data[4].toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')+'₽';",
+    "$('td:eq(4)', row).html(num);",
+
+    "}")
+                                  
+                                  )
+                                #initComplete = I("function(settings, json) {alert('Done.');}")
 )
+
 
 DT::dataTableOutput('tbl')
 
@@ -524,7 +629,7 @@ table.perf<-reactive({
   
 })
 
-renderDataTable(table.perf())
+renderTable(table.perf())
 ```
 
 Column {data-width=4}
