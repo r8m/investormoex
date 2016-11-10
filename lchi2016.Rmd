@@ -69,9 +69,10 @@ if (!is.null(resday))
 statLink<-"https://github.com/r8m/investormoex/raw/master/resDT.RData"
 download.file(statLink, "resDT.RData")
 load("resDT.RData")
-resDT[,trader_id:=NULL]
+#resDT[,trader_id:=NULL]
 revisionDate<-resDT[1,moment]
-resDT[,moment:=NULL]
+#resDT[,moment:=NULL]
+
 traders.list<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/trader.csv",  
              sep=";", as.is=TRUE,
                 quote="",
@@ -493,7 +494,7 @@ resDT<-resDT[,.SD, .SDcols=cols]
 
 output$tbl<-DT::renderDataTable(resDT,
                                 filter = 'top',
-                                selection = 'single',
+                                selection = "none",#'single',
                                 caption=paste("Ревизия:",revisionDate),
                                 colnames=colnamesru,
                                 rownames = FALSE,
