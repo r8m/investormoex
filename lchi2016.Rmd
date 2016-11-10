@@ -1,5 +1,5 @@
 ---
-title: "Trades Visualizer version 0.7   "
+title: "Trades Visualizer version 0.7b   "
 runtime: shiny
 output:
   flexdashboard::flex_dashboard:
@@ -96,11 +96,16 @@ Sidebar {.sidebar}
 ======================================================================
 ```{r side}
  renderUI({selectInput("exch", "Рынок:",
-             markets,selected=markets[marketSelected()[[1]][1]])})
+             markets#,
+             #selected=markets[marketSelected()[[1]][1]]
+             )
+   })
 
  renderUI({
    userChoices<-c("Выберите"="", "->Свои сделки<-"=1, f)
-   selectInput("nick", "Участник:",userChoices,selected=userChoices[userSelected()[[1]][1]])
+   selectInput("nick", "Участник:",userChoices#,
+               #selected=userChoices[userSelected()[[1]][1]]
+               )
    })
 
  renderUI ({
@@ -173,12 +178,12 @@ hr()
 ```{r download}
 
 
-marketSelected<-reactive({
-    s = input$tbl_rows_selected
-    ms<-resDT[s,contype_name]# %>% select(contype_name)
-    if (!length(s)) return (1)
-    else return (ms) 
-  })
+# marketSelected<-reactive({
+#     s = input$tbl_rows_selected
+#     ms<-resDT[s,contype_name]# %>% select(contype_name)
+#     if (!length(s)) return (1)
+#     else return (ms) 
+#   })
 
   marketId<-reactive(input$exch)
   userId<-reactive(input$nick)
@@ -225,12 +230,12 @@ marketSelected<-reactive({
 
   
 
-userSelected<-reactive({
-    s = input$tbl_rows_selected
-    us<-resDT[s,nik]# %>% select(nik)
-    if (!length(s)) return ("")
-    else return (us) 
-  })
+# userSelected<-reactive({
+#     s = input$tbl_rows_selected
+#     us<-resDT[s,nik]# %>% select(nik)
+#     if (!length(s)) return ("")
+#     else return (us) 
+#   })
 
 userSymbols<-reactive(levels(as.factor(userData2()$V2)))
 
@@ -494,7 +499,7 @@ output$tbl<-DT::renderDataTable(resDT,
                                   scrollY=T,
                                   scroller=T,
                                   autoWidth = TRUE,
-                                  columnDefs = list(list(width = '200px', targets = c(1))),
+                                  columnDefs = list(list(width = '120px', targets = c(0,1,8))),
                                   rowCallback = JS(
     "function(row, data) {",
     "var num = data[5].toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',')+'₽';",
