@@ -35,9 +35,6 @@ dateId<-"all"
 initEq<-100000
 
 if (!exists('.blotter')) .blotter <- new.env()
-userPortf<-"user_port"
-userAcc<-"user_acc"
-
 
 spot<-read.table("spot.csv", header=TRUE, sep=";", as.is=TRUE,encoding = "UTF-8")
 #REFRESH
@@ -55,15 +52,17 @@ resday<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/result_day.cs
 
 if (!is.null(resday)) 
   resday %>% 
+  filter(as.numeric(count_deal)>0) %>%
   select(trader_id,contype_name,dohod_rub,amount) %>% 
-  filter (dohod_rub!=0) -> resdayS
+  filter (dohod_rub!=0)-> resdayS
 
 
 if (!is.null(resday))
   resday %>% 
   select(contype_name,trader_id,	nik,	diler_name,	date_start,	dohod,	amount,	dohod_rub,	count_deal,	qty,	vol_rub,	uchastnik_activ,	duel_win,	duel_loss) %>% 
   filter(as.numeric(dohod_rub)!=0) %>%
-  filter(as.numeric(count_deal)>100) -> resdayAll
+  filter(as.numeric(count_deal)>0) -> resdayAll
+
 
 statLink<-"https://github.com/r8m/investormoex/raw/master/resDT.RData"
 download.file(statLink, "resDT.RData")
