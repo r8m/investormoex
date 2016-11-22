@@ -32,7 +32,7 @@ function (R, Rf = 0, main = NULL, geometric = TRUE, methods = "none",
   par(mar = c(1, 4, 0, 2))
 
   chart.BarVaR(x, main = "", xaxis = FALSE, width = width, 
-               ylab = "Дневна доходность", methods = methods, 
+               ylab = "Дневная доходность", methods = methods, 
                event.labels = NULL, ylog = FALSE, gap = gap, p = p, 
                ...)
   par(mar = c(5, 4, 0, 2))
@@ -41,7 +41,7 @@ function (R, Rf = 0, main = NULL, geometric = TRUE, methods = "none",
   par(op)
 }
 
-chart.Posn.my<-function (Portfolio, Symbol, Dates = NULL, ..., TA = NULL){
+chart.Posn.my<-function (Portfolio, Symbol, Dates = NULL, userName=NULL, ..., TA = NULL){
   pname <- Portfolio
   Portfolio <- getPortfolio(pname)
   if (missing(Symbol)) Symbol <- ls(Portfolio$symbols)[[1]]
@@ -96,11 +96,16 @@ chart.Posn.my<-function (Portfolio, Symbol, Dates = NULL, ..., TA = NULL){
  
   highchart() %>%
     hc_plotOptions(series=list(dataGrouping=list(enabled=FALSE)))%>%
-    hc_title(text = Symbol)%>%
+    hc_title(text = paste("Участник:",userName,"Инструмент:",Symbol, "Покупок:", nrow(Buys), " / Продаж:",nrow(Sells)))%>%
+    
     hc_yAxis_multiples(
-         list(title = list(text = NULL), height = "50%", top = "0%"),
-         list(title = list(text = NULL), height = "24%", top = "51%",opposite = TRUE),
-         list(title = list(text = NULL), height = "24%", top = "76%")
+      list(title = list(text = "Сделки"), height = "60%", top = "0%"),
+      list(title = list(text = "Позиция"), height = "10%",top = "67%"),
+      list(title = list(text = "Эквити/Просадка"), height = "20%",top = "80%")
+    #hc_yAxis_multiples(
+    #     list(title = list(text = NULL), height = "50%", top = "0%"),
+    #     list(title = list(text = NULL), height = "24%", top = "51%",opposite = TRUE),
+    #     list(title = list(text = NULL), height = "24%", top = "76%")
    ) %>%
     hc_add_series_ohlc(Prices, yAxis = 0,name=Symbol) %>%
     hc_add_series_xts(Positionfill, type="column", color = "blue",
@@ -121,7 +126,11 @@ chart.Posn.my<-function (Portfolio, Symbol, Dates = NULL, ..., TA = NULL){
   if(nrow(Sells)!=0) hc<-hc%>%hc_add_series_xts(Sells, color = "red",
                              type="scatter", marker = list(symbol = "triangle-down"),
                              enableMouseTracking = FALSE, yAxis = 0)
-  
+  hc<-hc %>% 
+    #hc_add_theme(hc_theme_flat())
+    #hc_add_theme(hc_theme_smpl())
+    #Cool hc_add_theme(hc_theme_538())
+    hc_add_theme(hc_theme_gridlight())
   return (hc)
 
 }

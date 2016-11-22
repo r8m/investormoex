@@ -14,7 +14,7 @@ if (!local) encoding<-"" else encoding<-"CP1251"
 
 library(FinancialInstrument)
 library(PerformanceAnalytics)
-library(rusquant)
+library(rusquant) # devtools::install_github('r8m/rusquant')
 library(blotter)
 library(ggplot2)
 library(dplyr)
@@ -67,6 +67,7 @@ if (!is.null(resday))
 statLink<-"https://github.com/r8m/investormoex/raw/master/resDT.RData"
 download.file(statLink, "resDT.RData")
 load("resDT.RData")
+file.remove("resDT.RData")
 #resDT[,trader_id:=NULL]
 revisionDate<-resDT[1,moment]
 #resDT[,moment:=NULL]
@@ -481,12 +482,12 @@ colnamesru<-c("Рынок",
 
 
 
-resDT<-resDT[,.SD, .SDcols=cols] 
+statDT<-resDT[,.SD, .SDcols=cols] 
 
-output$tbl<-DT::renderDataTable(resDT,
+output$tbl<-DT::renderDataTable(statDT,
                                 filter = 'top',
                                 selection = "none",#'single',
-                                caption=paste("Ревизия:",revisionDate),
+                                caption=paste("Последнее обновление: ",revisionDate,""),
                                 colnames=colnamesru,
                                 rownames = FALSE,
                                 width=200,
@@ -529,7 +530,7 @@ output$highchart<-renderHighchart({
    progress <- shiny::Progress$new(session, min=0, max=10)
     on.exit(progress$close())
     progress$set(value=9,message="", detail = 'Строим график...')  
-   chart.Posn.my(port2(), userSymbols2())
+   chart.Posn.my(Portfolio = port2(), Symbol = userSymbols2(), userName=resDT[trader_id==userId(), nik][1])
    
    })
    

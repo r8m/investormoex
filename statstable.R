@@ -53,16 +53,16 @@ rm(resday)
 nrec<-statDT[,.N]
 
 timerStart<-Sys.time()
-# resDT<-rbindlist(lapply(1:statDT[,.N], 
+# resDT<-rbindlist(lapply(1:statDT[,.N],
 #                         FUN = function(x) {makePortfolio(yearId, 
-#                                                         statDT[x,trader_id], 
-#                                                         statDT[x,marketId], 
-#                                                         statDT[x,nik],
-#                                                         statDT[x,amount], 
-#                                                         strptime(resday$moment[1], "%d.%m.%Y"), 
-#                                                         "10min" )
-#                           #print(paste(x,allU,sep=" / "))
-#                           }
+#                                                          statDT[x,trader_id], 
+#                                                          statDT[x,marketId], 
+#                                                          statDT[x,nik],
+#                                                          statDT[x,amount],
+#                                                          statDT[x,date_start],
+#                                                          statDT[1,moment], 
+#                                                          "10min" )
+#                           }))
 
 
 
@@ -193,7 +193,7 @@ resDT[,`:=`(dohod=round(dohod,1),
             
             )]
 
-
+resDT<-resDT[order(-Net.Trading.PL)] 
 save(resDT, file="resDT.RData")
 
 
