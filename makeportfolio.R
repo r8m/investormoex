@@ -27,7 +27,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   TradesLink<-paste(TradesLink, yearId,dateId,
                     paste(marketId,"_", userId,".zip", sep=""),
                     sep="/")
-  download.file(TradesLink, paste(marketId,"_", userId,".zip", sep=""))
+  download.file(TradesLink, paste(marketId,"_", userId,".zip", sep=""),quiet = T)
   unzip(paste(marketId,"_", userId,".zip", sep=""))
   
   #Read trades data
@@ -141,7 +141,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   
   # Add the transactions to the portfolio
   for(s in symbols){
-    us<-as.character(symbols.df[symbols.df[,1]==s,2])
+    us<-as.character(symbols.df[symbols.df[,1]==s,2])[1]
     
     if(length(qnty[seccode==us, startPos])){
       neworder<-data.frame(V1=as.character(index(get(s)$Open[1])),
@@ -157,6 +157,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
                        order.by=as.POSIXct(symbol.trades[,1]))
     
     colnames(symbol.trades)<-c("TxnPrice","TxnQty")
+    if(nrow(symbol.trades)>0)
     blotter:::addTxns(userPortf,s,
                       TxnData=symbol.trades,verbose=FALSE)
     
@@ -177,6 +178,8 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   tStats <- tradeStats(Portfolios = userPortf, inclZeroDays=F)
   #tStats[,4:ncol(tStats)] <- round(tStats[,4:ncol(tStats)], 2)
   #print(data.frame(t(tStats[,-c(1,2, 23)])))
+  file.remove(paste(marketId,"_", userId,".zip", sep=""))
+  file.remove(paste(marketId,"_", userId,".csv", sep=""))
   
   if(is.null(tStats) ||nrow(tStats)==0) return (NULL)
   else{
@@ -190,5 +193,6 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
     res<-data.table(nickname=nickname, userId=userId, marketId=marketId, symbol=rownames(tStats),usersymbol=ss[st][,userSymbols],tStats[,-c(1,2)])
     rm(list = symbols, envir =globalenv())
     res
+    
   }
 }

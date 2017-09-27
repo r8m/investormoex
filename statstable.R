@@ -58,15 +58,15 @@ statDT<-statDT[, marketId:=ifelse(contype_name=="Срочный", 2, ifelse(cont
 
 nrec<-statDT[,.N]
 
-timerStart<-Sys.time()
+ timerStart<-Sys.time()
 # resDT<-rbindlist(lapply(1:statDT[,.N],
-#                          FUN = function(x) {makePortfolio(yearId, 
-#                                                           statDT[x,trader_id], 
-#                                                           statDT[x,marketId], 
+#                          FUN = function(x) {makePortfolio(yearId,
+#                                                           statDT[x,trader_id],
+#                                                           statDT[x,marketId],
 #                                                           statDT[x,nik],
 #                                                           statDT[x,amount],
 #                                                           statDT[x,date_start],
-#                                                           statDT[1,moment], 
+#                                                           statDT[1,moment],
 #                                                           "10min" )
 #                            }))
 
