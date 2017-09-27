@@ -8,7 +8,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
                 paste("account",userAcc,sep=".")),
          pos=.blotter), silent =FALSE)
   
-  fromStart<- strptime("2016-09-15 19:00:00", "%F %H:%M:%S")
+  fromStart<- strptime("2017-09-21 19:00:00", "%F %H:%M:%S")
   from<- strptime(from, "%d.%m.%Y")
   dayofweek<-as.numeric(format(from,"%u"))
   if(dayofweek==1)
@@ -17,7 +17,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
     from<-from-60*60*24*1+60*60*19
   to<- strptime(to, "%d.%m.%Y")
 
-  data(tickers)
+  
   #download user data and trades data
   #userId<-"50175"
   dateId<-"all" # all - all trades, 20141208 - day trades
@@ -50,11 +50,19 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   #MOEXSymbols<-loadStockListMoex()
   #MOEXSymbols<-data.table(MOEXSymbols, stringsAsFactors=FALSE)
 
-  if (marketId==2) 
+  if (marketId==2){
     symbols<-unlist(sapply(paste(userSymbols, " ", sep=""), 
                            searchSymbol, USE.NAMES=FALSE))
+    ss<-data.table(cbind(symbols,userSymbols))
+    ss[is.na(symbols),symbols:=unlist(sapply(userSymbols,searchSymbol, USE.NAMES=FALSE))]
+    symbols<-ss[,symbols]
+    rm(ss)
+    
+  } 
+    
   else 
     symbols<-unlist(sapply(gsub(" ","",userSymbols), FUN=function(x) spot[x==gsub(" ","",spot[,1]),2]))#spot[spot[,1] %in% gsub(" ","",userSymbols),2]
+
 
   #from<-as.Date(userData[1,1])
   from<-from
@@ -170,7 +178,7 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   #tStats[,4:ncol(tStats)] <- round(tStats[,4:ncol(tStats)], 2)
   #print(data.frame(t(tStats[,-c(1,2, 23)])))
   
-  if(is.null(tStats)) return (NULL)
+  if(is.null(tStats) ||nrow(tStats)==0) return (NULL)
   else{
     
     ss<-data.table(symbols.df)

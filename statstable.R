@@ -19,10 +19,12 @@ library(data.table)
 #source("func.my.R",encoding = "UTF-8")
 source('makeportfolio.R',encoding = "UTF-8")
 
-data(tickers)
+tickers<-loadStockListMfd()
+
 markets<-c("Срочный"=2, "Фондовый"=1, "Валютный"=3)
 TradesLink<-"ftp://ftp.moex.com/pub/info/stats_contest"
-yearId<-2016
+yearId<-2017
+dealsTreshhold<-50
 #dateId<-"all"
 #initEq<-100000
 
@@ -34,36 +36,39 @@ spot<-read.table("spot.csv", header=TRUE, sep=";", as.is=TRUE,encoding = "UTF-8"
 #write.table(spot,file="spot.csv",sep=";",row.names = F )
 #REFRESH
 
-resday<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2016/result_day.csv",
-                   header=TRUE
-                   , sep=";", 
-                   dec=".",
-                   quote="",
-                   as.is=TRUE,
-                   fileEncoding = encoding,
-                   skipNul=TRUE
-)
+# resday<-read.table("ftp://ftp.moex.com/pub/info/stats_contest/2017/result_day.csv",
+#                    header=TRUE
+#                    , sep=";", 
+#                    dec=".",
+#                    quote="",
+#                    as.is=TRUE,
+#                    fileEncoding = encoding,
+#                    skipNul=TRUE
+# )
+download.file("ftp://ftp.moex.com/pub/info/stats_contest/2017/result_day.csv", "result_day.csv")
+writeLines(iconv(readLines("result_day.csv"), from = "CP1251", to = "UTF8"), 
+           file("result_day1.csv", encoding="UTF-8"))
 
+statDT<-fread("result_day1.csv",fill = T)
+file.remove("result_day.csv")
+file.remove("result_day1.csv")
 
-statDT<-data.table(resday)
-statDT<-statDT[as.numeric(count_deal)>1000]
+statDT<-statDT[as.numeric(count_deal)>dealsTreshhold]
 statDT<-statDT[, marketId:=ifelse(contype_name=="Срочный", 2, ifelse(contype_name=="Фондовый", 1,3))]
-rm(resday)
 
 nrec<-statDT[,.N]
 
 timerStart<-Sys.time()
 # resDT<-rbindlist(lapply(1:statDT[,.N],
-#                         FUN = function(x) {makePortfolio(yearId, 
-#                                                          statDT[x,trader_id], 
-#                                                          statDT[x,marketId], 
-#                                                          statDT[x,nik],
-#                                                          statDT[x,amount],
-#                                                          statDT[x,date_start],
-#                                                          statDT[1,moment], 
-#                                                          "10min" )
-#                           }))
-
+#                          FUN = function(x) {makePortfolio(yearId, 
+#                                                           statDT[x,trader_id], 
+#                                                           statDT[x,marketId], 
+#                                                           statDT[x,nik],
+#                                                           statDT[x,amount],
+#                                                           statDT[x,date_start],
+#                                                           statDT[1,moment], 
+#                                                           "10min" )
+#                            }))
 
 
 library(foreach)
@@ -72,7 +77,7 @@ no_cores <- detectCores()
 cl<-makeCluster(no_cores, outfile="")
 registerDoParallel(cl)
 
-#nrec=4
+
 parMakePortfolio <- function (nrec) {
   foreach(x = 1:nrec, 
           #.combine = rbindlist,
@@ -194,7 +199,7 @@ resDT[,`:=`(dohod=round(dohod,1),
             )]
 
 resDT<-resDT[order(-Net.Trading.PL)] 
-save(resDT, file="resDT.RData")
+save(resDT, file="resDT2017.RData")
 
 
 
@@ -264,4 +269,5 @@ save(resDT, file="resDT.RData")
 # 
 # resDT<-resDT[,.SD, .SDcols=cols] [order(-Profit.Factor)] 
 # save(resDT, file="resDT.RData")
+
 

@@ -30,7 +30,7 @@ source("func.my.R",encoding = "UTF-8")
 data(tickers)
 markets<-c("Срочный"=2, "Фондовый"=1, "Валютный"=3)
 TradesLink<-"ftp://ftp.moex.com/pub/info/stats_contest"
-yearId<-2016
+yearId<-2017
 dateId<-"all"
 initEq<-100000
 
@@ -142,7 +142,7 @@ Sidebar {.sidebar}
 dateRangeInput('dateRange2',format = "dd/mm/yy",
                                              label = 'Выбор дат:',
                                              #min = "2016-09-15", max = Sys.Date(),
-                                             start = "2016-09-15",
+                                             start = "2017-09-21",
                                              end   = Sys.Date(),
                                              language = "ru",
                                              separator = " - ", 
@@ -325,8 +325,8 @@ userSymbols2<- eventReactive(input$goButton, {    input$stock  })
       xxx.df<-as.data.frame(ret())
       row.NAMES<-row.names(xxx.df)
       #REFRESH
-      if (marketId()==2) first2<-grep("2016-09-15 19:",row.NAMES)[1]-1
-      else first2<-grep("2016-09-16", row.NAMES)[1]-1
+      if (marketId()==2) first2<-grep("2017-09-21 19:",row.NAMES)[1]-1
+      else first2<-grep("2017-09-21", row.NAMES)[1]-1
       new.order<-c(row.NAMES[first2],userSymbols2(),initPosQty(), xxx.df[first2,4])
       userData2<-rbind(new.order,symbol.trades())
       return (userData2)

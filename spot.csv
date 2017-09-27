@@ -1,52 +1,133 @@
 Tickers;Desc
-ABRD;АбрауДюрсо
-AESL;АЭССЕЛЬао
+ACKO;АСКО ао
 AFKS;Система ао
 AFLT;Аэрофлот
 AGRO;AGRO-гдр
 AKRN;Акрон
-ALBK;БестЭфБ ао
-ALNU;АЛРОСА-Нюр
 ALRS;АЛРОСА ао
-AMEZ;АшинскийМЗ
 APTK;Аптеки36и6
-AQUA;РусАква ао
-ARSA;Арсагера
-ASSB;АстрЭнСб
-AVAN;Авангрд-ао
 AVAZ;АВТОВАЗ ао
 AVAZP;АВТОВАЗ ап
 BANE;Башнефт ао
 BANEP;Башнефт ап
+BSPB;БСП ао
+CBOM;МКБ ао
+CHMF;СевСт-ао
+DASB;ДагСб ао
+DIXY;ДИКСИ ао
+DSKY;ДетскийМир
+ENRU;ЭнелРос ао
+EPLN;Европлан
+FEES;ФСК ЕЭС ао
+FESH;ДВМП ао
+FTRE;БУДУЩЕЕ ао
+GAZP;ГАЗПРОМ ао
+GCHE;ЧеркизГ-ао
+GMKN;ГМКНорНик
+GRNT;ГИТ ао
+GTLC;GTL ао
+HYDR;РусГидро
+IRAO;ИнтерРАОао
+IRGZ;ИркЭнерго
+KMAZ;КАМАЗ ао
+KRKNP;СаратНПЗ-п
+LKOH;ЛУКОЙЛ
+LNTA;Лента др
+LSNGP;Ленэнерг-п
+LSRG;ЛСР ао
+MAGN;ММК
+MFON;МегаФон ао
+MGNT;Магнит ао
+MOEX;МосБиржа
+MRKC;МРСК Центр
+MRKP;МРСК ЦП
+MRKV;МРСКВол
+MSNG;+МосЭнерго
+MSRS;МОЭСК
+MSTT;Мостотрест
+MTLR;Мечел ао
+MTLRP;Мечел ап
+MTSS;МТС-ао
+MVID;М.видео
+NKNCP;НКНХ ап
+NLMK;НЛМК ао
+NMTP;НМТП ао
+NVTK;Новатэк ао
+ODVA;Медиахолд
+OFCB;ОткрФКБ ао
+OGKB;ОГК-2 ао
+PHOR;ФосАгро ао
+PIKK;ПИК ао
+PLZL;Полюс
+POLY;Polymetal
+PRFN;iЧЗПСН ао
+PRTK;ПРОТЕК ао
+PSBR;Промсвб ао
+QIWI;iQIWI
+RASP;Распадская
+RBCM;РБК ао
+RGSS;РГС СК ао
+RNFT;РуссНфт ао
+ROLO;Русолово
+ROSN;Роснефть
+RSTI;Россети ао
+RSTIP;Россети ап
+RTKM;Ростел -ао
+RTKMP;Ростел -ап
+RUAL;RUSAL plc
+RUALR;Русал рдр
+SBER;Сбербанк
+SBERP;Сбербанк-п
+SELG;Селигдар
+SELGP;Селигдар-п
+SIBN;Газпрнефть
+SNGS;Сургнфгз
+SNGSP;Сургнфгз-п
+SVAV;СОЛЛЕРС
+TAER;ТРАНСАЭРао
+TATN;Татнфт 3ао
+TATNP;Татнфт 3ап
+TGKA;ТГК-1
+TGKO;ТКЗ ао
+TRCN;ТрансК ао
+TRMK;ТМК ао
+TRNFP;Транснф ап
+UNAC;iАвиастКао
+UPRO;Юнипро ао
+URKA;Уркалий-ао
+UWGN;ОВК ао
+VSMO;ВСМПО-АВСМ
+VTBR;ВТБ ао
+YNDX;Yandex clA
+ABRD;АбрауДюрсо
+AESL;АЭССЕЛЬао
+ALBK;БестЭфБ ао
+ALNU;АЛРОСА-Нюр
+AMEZ;АшинскийМЗ
+AQUA;РусАква ао
+ARSA;Арсагера
+ASSB;АстрЭнСб
+AVAN;Авангрд-ао
 BISV;БашИнСв ао
 BISVP;БашИнСв ап
 BLNG;Белон ао
 BRZL;БурЗолото
-BSPB;БСП ао
-CBOM;МКБ ао
 CHEP;ЧТПЗ ао
 CHGZ;ЧерногНефт
 CHKZ;ЧКПЗ ао
-CHMF;СевСт-ао
 CHMK;ЧМК ао
 CHZN;ЧЦЗ ао
 CLSB;ЧелябЭС ао
 CLSBP;ЧелябЭС ап
 CNTL;Телеграф
 CNTLP;Телеграф-п
-DASB;ДагСб ао
 DGBZ;Дорогбж ао
 DIOD;iЗаводДИОД
-DIXY;ДИКСИ ао
 DVEC;ДЭК ао
 DZRD;iДонскЗР
 DZRDP;iДонскЗР п
 ELTZ;Электрцинк
-ENRU;ЭнелРос ао
-EPLN;Европлан
 ERCO;ЭРКО ао
-FEES;ФСК ЕЭС ао
-FESH;ДВМП ао
 FORTP;Форт ап
 FXAU;FXAU ETF
 FXCN;FXCN ETF
@@ -63,25 +144,18 @@ FXUS;FXUS ETF
 GAZA;ГАЗ ао
 GAZAP;ГАЗ ап
 GAZC;ГАЗКОН-ао
-GAZP;ГАЗПРОМ ао
 GAZS;ГАЗ-сервис
 GAZT;ГАЗ-Тек ао
-GCHE;ЧеркизГ-ао
-GMKN;ГМКНорНик
 GRAZ;Разгуляй
-GRNT;ГИТ ао
 GTPR;ГлТоргПрод
 GTSS;iГЕОТЕК ао
 HALS;Галс-Девел
 HIMC;Химпром ао
 HIMCP;Химпром ап
-HYDR;РусГидро
 IDVP;Инв-Девел
 IGST;Ижсталь2ао
 IGST03;Ижсталь3ао
 IGSTP;Ижсталь ап
-IRAO;ИнтерРАОао
-IRGZ;ИркЭнерго
 IRKT;ИРКУТ-3
 ISKJ;iИСКЧ ао
 JNOS;Славн-ЯНОС
@@ -100,7 +174,6 @@ KMEZ;КМЗ
 KMTZ;КосогМЗ ао
 KOGK;КоршГОК ао
 KRKN;СаратНПЗ
-KRKNP;СаратНПЗ-п
 KRKO;ТКЗКК ао
 KRKOP;ТКЗКК ап
 KROT;КрасОкт-ао
@@ -118,23 +191,16 @@ KZMS;КЗМС ао
 KZOS;ОргСинт ао
 KZOSP;ОргСинт ап
 LIFE;iФармсинтз
-LKOH;ЛУКОЙЛ
-LNTA;Лента др
 LNZL;Лензолото
 LNZLP;Лензол. ап
 LPSB;ЛЭСК ао
 LSNG;Ленэнерго
-LSNGP;Ленэнерг-п
-LSRG;ЛСР ао
 LVHK;iЛевенгук
 MAGE;МагадЭн ао
 MAGEP;МагадЭн ап
-MAGN;ММК
 MERF;МЕРИДИАН
 MFGS;Мегион-ао
 MFGSP;Мегион-ап
-MFON;МегаФон ао
-MGNT;Магнит ао
 MGNZ;СМЗ-ао
 MGTS;МГТС-5ао
 MGTSP;МГТС-4ап
@@ -143,81 +209,47 @@ MISBP;МариЭнСб-п
 MMBM;БМ-Банк
 MNFD;МН-фонд ао
 MOBB;МосОблБанк
-MOEX;МосБиржа
 MORI;Морион ао
 MOTZ;Мотовил ао
-MRKC;МРСК Центр
 MRKK;МРСК СК
-MRKP;МРСК ЦП
 MRKS;МРСКСиб
 MRKU;МРСК Ур
-MRKV;МРСКВол
 MRKY;МРСКЮга ао
 MRKZ;МРСК СЗ
 MRSB;МордЭнСб
 MSNG;Мосэнерго
-MSRS;МОЭСК
 MSST;iМультиСис
-MSTT;Мостотрест
-MTLR;Мечел ао
-MTLRP;Мечел ап
-MTSS;МТС-ао
 MUGS;МурмТЭЦ-ао
 MUGSP;МурмТЭЦ-п
-MVID;М.видео
 NAUK;iНПОНаука
 NFAZ;Нефтекамск
 NKHP;НКХП ао
 NKNC;НКНХ ао
-NKNCP;НКНХ ап
 NKSH;Нижкамшина
-NLMK;НЛМК ао
-NMTP;НМТП ао
 NNSB;ТНСэнНН ао
 NNSBP;ТНСэнНН ап
 NPOF;Физика ао
 NSVZ;iНаукаСвяз
-NVTK;Новатэк ао
-ODVA;Медиахолд
-OFCB;ОткрФКБ ао
-OGKB;ОГК-2 ао
 OMSH;Омскшина
 OMZZP;ОМЗ-ап
 OPIN;ОПИН ао
 OSMP;ОМПК ао
 OTCP;Отисифарм
 PAZA;ПавлАвт ао
-PHOR;ФосАгро ао
 PHST;Фармстанд
-PIKK;ПИК ао
 PLSM;Плазмек
-PLZL;Полюс
 PMSB;ПермьЭнСб
 PMSBP;ПермьЭнС-п
-POLY;Polymetal
-PRFN;iЧЗПСН ао
 PRIM;ПМП ао
 PRMB;Приморье
-PRTK;ПРОТЕК ао
-PSBR;Промсвб ао
-QIWI;iQIWI
-RASP;Распадская
-RBCM;РБК ао
 RDRB;РДБанк ао
-RGSS;РГС СК ао
 RKKE;ЭнергияРКК
 RLMN;iРоллман
 RLMNP;iРоллман-п
 RODNP;Родина ап
-ROLO;Русолово
 ROSB;Росбанк ао
-ROSN;Роснефть
 ROST;РОСИНТЕРао
-RSTI;Россети ао
-RSTIP;Россети ап
 RTGZ;ГазпРнД ао
-RTKM;Ростел -ао
-RTKMP;Ростел -ап
 RTSB;ТНСэнРст
 RTSBP;ТНСэнРст-п
 RU000A0ERGA7;ПИФСбер-КН
@@ -329,8 +361,6 @@ RU000A0JVRF4;СберЖлНед3
 RU000A0JVUU7;Холи Лэнд
 RU000A0JWAW3;СберАрБизн
 RU000A0JWJA0;САФМАРПлз
-RUAL;RUSAL plc
-RUALR;Русал рдр
 RUGR;Русгрэйн
 RUSI;ИКРУСС-ИНВ
 RUSP;Русполимет
@@ -339,28 +369,17 @@ SAGO;СамарЭн-ао
 SAGOP;СамарЭн-ап
 SARE;СаратЭн-ао
 SAREP;СаратЭн-ап
-SBER;Сбербанк
-SBERP;Сбербанк-п
-SELG;Селигдар
-SELGP;Селигдар-п
 SELL;Селестра
 SIBG;СибГост ао
-SIBN;Газпрнефть
 SKYC;СкайКо-ао
-SNGS;Сургнфгз
-SNGSP;Сургнфгз-п
 STSB;СтаврЭнСб
 STSBP;СтаврЭнСбп
-SVAV;СОЛЛЕРС
 SYNG;Синерг. ао
 SZPR;СЗПароход
 TANL;ТАНТАЛ ао
 TANLP;ТАНТАЛ ап
 TASB;ТамбЭнСб
 TASBP;ТамбЭнСб-п
-TATN;Татнфт 3ао
-TATNP;Татнфт 3ап
-TGKA;ТГК-1
 TGKB;ТГК-2
 TGKBP;ТГК-2 ап
 TGKD;Квадра
@@ -369,23 +388,16 @@ TGKN;ТГК-14
 TNSE;ТНСэнрг ао
 TORS;ТРК ао
 TORSP;ТРК ап
-TRCN;ТрансК ао
-TRMK;ТМК ао
-TRNFP;Транснф ап
 TTLK;Таттел. ао
 TUCH;ТКСМ ао
 TUZA;ТЗА ао
 UCSS;ОКС ао
 UKUZ;ЮжКузб. ао
-UNAC;iАвиастКао
 UNKL;ЮУНК ао
-UPRO;Юнипро ао
 URFD;УКОРФ ао
-URKA;Уркалий-ао
 URKZ;УрКузница
 USBN;УралСиб ао
 UTAR;ЮТэйр ао
-UWGN;ОВК ао
 VDSB;ВЭК 01 ао
 VGSB;ВолгЭнСб
 VGSBP;ВолгЭнСб-п
@@ -396,10 +408,8 @@ VRAO;ВостРАО ао
 VRAOP;ВостРАО ап
 VRSB;ТНСэнВорон
 VRSBP;ТНСэнВор-п
-VSMO;ВСМПО-АВСМ
 VSYD;ВыбСудЗ ао
 VSYDP;ВыбСудЗ ап
-VTBR;ВТБ ао
 VTGK;ТПлюс ао
 VTRS;iВТОРРЕСао
 VZRZ;Возрожд-ао
@@ -409,7 +419,6 @@ WTCMP;ЦМТ ап
 YAKG;ЯТЭК ао
 YKEN;Якутскэнрг
 YKENP;Якутскэн-п
-YNDX;Yandex clA
 YRSB;ТНСэнЯр
 YRSBP;ТНСэнЯр-п
 ZHIV;Живой Оф
@@ -427,10 +436,9 @@ EURUSD000TOD;EURUSD_TOD
 EURUSD000TOM;EURUSD_TOM
 EURUSDTODTOM;EURUSDTDTM
 CNY000000TOD;CNYRUB_TOD
-CNYRUB_TOM;CNYRUB_TOM
+CNYRUB_TOM ;CNYRUB_TOM
 CNYRUBTODTOM;CNY_TODTOM
 GLDRUB_TOM;GLDRUB_TOM
 GLDRUBTODTOM;GLD_TODTOM
 SLVRUB_TOM;SLVRUB_TOM
 SLVRUBTODTOM;SLV_TODTOM
-TAER;ТРАНСАЭРао
