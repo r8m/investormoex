@@ -1,9 +1,9 @@
 library(data.table)
-makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=100000, from,to, period){
+makePortfolio<-function(x,yearId, userId,marketId, nickname="unknown", amount=100000, from,to, period){
   
   #Remove account and portfolio if run previously
   #.blotter<-NULL
-  message(nickname)
+  message(x," ",nickname)
   try(rm(list=c(paste("portfolio",userPortf,sep="."),
                 paste("account",userAcc,sep=".")),
          pos=.blotter), silent =FALSE)
@@ -53,11 +53,15 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
   if (marketId==2){
     symbols<-unlist(sapply(paste(userSymbols, " ", sep=""), 
                            searchSymbol, USE.NAMES=FALSE))
-    ss<-data.table(cbind(symbols,userSymbols))
-    ss[is.na(symbols),symbols:=unlist(sapply(userSymbols,searchSymbol, USE.NAMES=FALSE))]
-    symbols<-ss[,symbols]
-    rm(ss)
     
+    if(sum(is.na(symbols))>0){
+      tt<-data.table(tickers)
+      missingSym<-tt[V4 %in% userSymbols, V4]
+      symbols<-sort(c(symbols, missingSym))
+      userSymbols<-sort(userSymbols)
+      
+    }
+
   } 
     
   else 
@@ -192,7 +196,8 @@ makePortfolio<-function(yearId, userId,marketId, nickname="unknown", amount=1000
     
     res<-data.table(nickname=nickname, userId=userId, marketId=marketId, symbol=rownames(tStats),usersymbol=ss[st][,userSymbols],tStats[,-c(1,2)])
     rm(list = symbols, envir =globalenv())
-    res
+    if (nrow(res)==0 || length(res)==0) return (NULL)
+    else return(res)
     
   }
 }

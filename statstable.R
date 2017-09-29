@@ -60,7 +60,7 @@ nrec<-statDT[,.N]
 
  timerStart<-Sys.time()
 # resDT<-rbindlist(lapply(1:statDT[,.N],
-#                          FUN = function(x) {makePortfolio(yearId,
+#                          FUN = function(x) {makePortfolio(x,yearId,
 #                                                           statDT[x,trader_id],
 #                                                           statDT[x,marketId],
 #                                                           statDT[x,nik],
@@ -69,7 +69,7 @@ nrec<-statDT[,.N]
 #                                                           statDT[1,moment],
 #                                                           "10min" )
 #                            }))
-
+# 
 
 library(foreach)
 library(doParallel)
@@ -83,7 +83,8 @@ parMakePortfolio <- function (nrec) {
           #.combine = rbindlist,
           .export = c("spot", "tickers", "statDT", "yearId","makePortfolio","userPortf", "userAcc"), 
           .packages = c("rusquant", "blotter", "PerformanceAnalytics", "data.table"))  %dopar%  
-    makePortfolio(yearId, 
+    makePortfolio(x,
+                  yearId, 
                   statDT[x,trader_id], 
                   statDT[x,marketId], 
                   statDT[x,nik],
@@ -200,74 +201,5 @@ resDT[,`:=`(dohod=round(dohod,1),
 
 resDT<-resDT[order(-Net.Trading.PL)] 
 save(resDT, file="resDT2017.RData")
-
-
-
-##################33
-# 
-# no_cores <- detectCores()
-# # Initiate cluster
-# cl <- makeCluster(no_cores,type="FORK")
-# symbDT<-parLapply(cl,1:statDT[,.N], 
-#                  fun = function(x) {makeSymbols(yearId, 
-#                                                   statDT[x,trader_id], 
-#                                                   statDT[x,marketId], 
-#                                                   statDT[x,nik],
-#                                                   statDT[x,amount],
-#                                                   strptime(statDT[x,date_start], "%d.%m.%Y"),
-#                                                   strptime(resday$moment[1], "%d.%m.%Y"), 
-#                                                   "10min" )
-#                    #print(paste(x,allU,sep=" / "
-#                    
-#                  }
-# )
-# stopCluster(cl)
-# symbDT<-rbindlist(symbDT)
-# 
-# symbDT[,skey:=paste(userId, usersymbol, sep="")]
-# setkey(symbDT,skey)
-# 
-# resDT[,skey:=paste(trader_id, ticker, sep="")]
-# setkey(resDT,skey)
-# 
-# symbresDT<-symbDT[resDT]
-# symbresDT<-symbresDT[unique(skey)]
-# 
-# symbresDT[, cor_contype_name:=ifelse(marketId== 2,"Срочный", ifelse(marketId==1,"Фондовый","Валютный"))]
-# 
-# symbresDT[, contype_name:=cor_contype_name]
-# resDT<-symbresDT
-# 
-# cols<-c("moment",
-#         "contype_name", 
-#         "trader_id",
-#         "nik",
-#         "ticker",
-#         "tickersqty",
-#         "diler_name",
-#         "date_start",
-#         "dohod",
-#         "amount",
-#         "dohod_rub",
-#         "count_deal",
-#         "qty",
-#         "vol_rub",
-#         "duel_win",
-#         "duel_loss",
-#         "nickname",
-#         "Num.Txns",
-#         "Num.Trades",
-#         "Net.Trading.PL",
-#         "Percent.Positive" ,
-#         "Percent.Negative" ,
-#         "Profit.Factor",
-#         "Max.Drawdown"  , 
-#         "Max.Equity",
-#         "Min.Equity" ,  
-#         "End.Equity")
-# 
-# 
-# resDT<-resDT[,.SD, .SDcols=cols] [order(-Profit.Factor)] 
-# save(resDT, file="resDT.RData")
 
 

@@ -1,8 +1,9 @@
-﻿library(jsonlite)
+library(jsonlite)
 library(httr)
 library(reshape2)
 library(dplyr)
-setwd("H:/R/Shiny/LCHI2016/parser")
+library(data.table)
+setwd("~/repo/shinyLCHI(AlexeyT)/new")
 
 
 #твоя функция не изменная
@@ -22,15 +23,13 @@ getInitPos<-function(traderId, startDate){
 }
 
 
-resday <- read.table("ftp://ftp.moex.com/pub/info/stats_contest/2017/result_day.csv",
-                     header = TRUE
-                     , sep = ";", 
-                     dec = ".",
-                     quote = "",
-                     as.is = TRUE,
-                     # fileEncoding = "CP1251",
-                     skipNul= TRUE
-)
+download.file("ftp://ftp.moex.com/pub/info/stats_contest/2017/result_day.csv", "result_day.csv")
+writeLines(iconv(readLines("result_day.csv"), from = "CP1251", to = "UTF8"), 
+           file("result_day1.csv", encoding="UTF-8"))
+
+resday<-fread("result_day1.csv",fill = T)
+file.remove("result_day.csv")
+file.remove("result_day1.csv")
 
 resday %>% filter (dohod_rub!=0)%>%
   select(trader_id,date_start)%>%unique-> resday2
@@ -44,7 +43,7 @@ for (i in 1:nrow(resday2))
 {
 #i<-898
   traderId<-resday2[i,1]
-  
+  message(traderId)
  # traderId<-148835
 #  startDate<-strptime("22.09.2017", format = "%d.%m.%Y")
   
@@ -70,16 +69,10 @@ qntFinal<-qntyDF%>%filter(startPos!=0)%>%select(id,seccode,startPos)
 #test<-read.csv("qntFinal.csv", as.is=TRUE)
 
 
-inst.all<-read.table("ftp://ftp.moex.com/pub/info/stats/forts/FORTS_LIST.TXT",
-                     header=TRUE,
-                     sep=";",
-                     as.is=TRUE
-                     )
 
-inst.all<-read.table("H:/R/Shiny/LCHI2016/FORTS_LIST.TXT",
-                     header=TRUE,
-                     sep=";",
-                     as.is=TRUE
+inst.all<-fread("ftp://ftp.moex.com/pub/info/stats/forts/FORTS_LIST.TXT",
+                header=TRUE,
+                sep=';'
 )
 
 
